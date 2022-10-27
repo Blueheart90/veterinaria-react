@@ -1,9 +1,11 @@
-import React from 'react'
+import React from 'react';
 
 function Header() {
   return (
-    <div>Desde header</div>
-  )
+    <header>
+      <h1 className="text-4xl font-bold">Desde header</h1>
+    </header>
+  );
 }
 
-export default Header
+export default Header;
