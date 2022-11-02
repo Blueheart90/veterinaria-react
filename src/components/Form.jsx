@@ -1,6 +1,73 @@
 import { useState, useEffect } from 'react';
+import Error from './Error';
 
-function Form() {
+function Form({ setPatients, patients, setPatient, patient }) {
+  const [name, setName] = useState('');
+  const [owner, setOwner] = useState('');
+  const [email, setEmail] = useState('');
+  const [discharge, setDischarge] = useState('');
+  const [symptoms, setSymptoms] = useState('');
+  const [error, setError] = useState(false);
+
+  const idGenerator = () => {
+    const random = Math.random().toString(36).substring(2);
+    const date = Date.now().toString(36);
+    return random + date;
+  };
+
+  useEffect(() => {
+    if (Object.keys(patient).length > 0) {
+      setName(patient.name);
+      setOwner(patient.owner);
+      setEmail(patient.email);
+      setDischarge(patient.discharge);
+      setSymptoms(patient.symptoms);
+    }
+  }, [patient]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Validations
+    if ([name, owner, email, discharge, symptoms].includes('')) {
+      setError(true);
+      return;
+    }
+    setError(false);
+
+    // Patients obj
+    const patientsObj = {
+      name,
+      owner,
+      email,
+      discharge,
+      symptoms,
+    };
+
+    if (patient.id) {
+      // Editando paciente
+      patientsObj.id = patient.id;
+
+      const updatedPatients = patients.map((patientState) =>
+        patientState.id === patient.id ? patientsObj : patientState
+      );
+
+      setPatients(updatedPatients);
+      setPatient({});
+    } else {
+      // Agregando nuevo paciente
+      patientsObj.id = idGenerator();
+      setPatients([...patients, patientsObj]);
+    }
+
+    // form reset
+    setName('');
+    setOwner('');
+    setEmail('');
+    setDischarge('');
+    setSymptoms('');
+  };
+
   return (
     <div className=" md:w-1/2 lg:w-2/5">
       <h2 className=" font-black text-3xl text-center">
@@ -11,9 +78,10 @@ function Form() {
         <span className=" text-indigo-600 font-bold ">Administralos</span>
       </p>
       <form
-        action=""
-        className=" bg-white shadow-md rounded-lg py-10 px-5 mb-10"
+        onSubmit={handleSubmit}
+        className=" bg-white shadow-md rounded-lg py-10 px-5 mb-10 mx-5"
       >
+        {error && <Error message="Todos los campos son obligatorios" />}
         <div className=" mb-5">
           <label
             htmlFor="mascota"
@@ -26,20 +94,24 @@ function Form() {
             type="text"
             placeholder="Nombre de la Mascota"
             className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className=" mb-5">
           <label
-            htmlFor="propietario"
+            htmlFor="owner"
             className=" block text-gray-700 uppercase font-bold"
           >
             Nombre Propietario
           </label>
           <input
-            id="propietario"
+            id="owner"
             type="text"
             placeholder="Nombre del Propietario"
             className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
+            value={owner}
+            onChange={(e) => setOwner(e.target.value)}
           />
         </div>
         <div className=" mb-5">
@@ -54,19 +126,23 @@ function Form() {
             type="email"
             placeholder="Email Contacto Propietario"
             className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className=" mb-5">
           <label
-            htmlFor="alta"
+            htmlFor="discharge"
             className=" block text-gray-700 uppercase font-bold"
           >
             Alta
           </label>
           <input
-            id="alta"
+            id="discharge"
             type="date"
             className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
+            value={discharge}
+            onChange={(e) => setDischarge(e.target.value)}
           />
         </div>
         <div className=" mb-5">
@@ -83,12 +159,14 @@ function Form() {
             rows="10"
             className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
             placeholder="Describe los Síntomas"
+            value={symptoms}
+            onChange={(e) => setSymptoms(e.target.value)}
           />
         </div>
         <input
           type="submit"
           className=" bg-indigo-600 w-full text-white p-3 uppercase font-bold rounded-md hover:bg-indigo-700 cursor-pointer transition-colors"
-          value="Agregar Paciente"
+          value={patient.id ? 'Editar Paciente' : 'Agregar Paciente'}
         />
       </form>
     </div>
